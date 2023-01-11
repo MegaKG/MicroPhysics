@@ -9,7 +9,7 @@
 
 //Constants
 const double GravityConstant = 0.00001;
-const double ResistanceForce = 0.1;
+const double ResistanceForce = 0.0;
 const double CollisionDistance = 0.1;
 
 class Body {
@@ -23,6 +23,9 @@ class Body {
 
         double XVelocity;
         double YVelocity;
+
+        double PendingXVelocity;
+        double PendingYVelocity;
 
         char WholeX; //Is an X Plane, locks the body in place
         char WholeY; //Is a Y Plane, locks the body in place
@@ -40,13 +43,15 @@ class Body {
         }
 
         void updateVelocity(double XCH, double YCH){
-            XVelocity += XCH;
-            YVelocity += YCH;
+            PendingXVelocity += XCH;
+            PendingYVelocity += YCH;
+            printf("New Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
         }
 
         void setVelocity(double XCH, double YCH){
-            XVelocity = XCH;
-            YVelocity = YCH;
+            PendingXVelocity = XCH;
+            PendingYVelocity = YCH;
+            printf("New Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
         }
 
         long getID(){
@@ -81,20 +86,31 @@ class Body {
         }
 
         void tick(double TimeFrame){
+            XVelocity = PendingXVelocity;
+            YVelocity = PendingYVelocity;
+
             if ((WholeX == 0) && (WholeY == 0)){
                 X += (XVelocity * TimeFrame);
                 Y += (YVelocity * TimeFrame);
+            }
+            else {
+                //Fix our Velocities
+                XVelocity = 0;
+                YVelocity = 0;
             }
             
         }
 
         double distanceFrom(Body* Target){
-            if (this->WholeX){
+            printf("A: (%lf,%lf) B: (%lf,%lf)\n",this->X,this->Y,Target->X,Target->Y);
+            if ((this->WholeX) || (Target->WholeX)){
                 //Return the Absolute Distance Y
+                
                 return pow(pow(this->Y - Target->Y,2),0.5);
             }
-            else if (this->WholeY){
+            else if ((this->WholeY) || (Target->WholeY)){
                 //Return the Absolute Distance X
+                
                 return pow(pow(this->X - Target->X,2),0.5);
             }
             else {
@@ -126,6 +142,7 @@ class Engine {
             for (long i = 0; i < this->BodyCount; i++){
                 if (this->MyBodies[i] == NULL){
                     this->MyBodies[i] = MyBody;
+                    break;
                 }
             }
         }
@@ -143,7 +160,17 @@ class Engine {
             return NULL;
         }
 
+        void ListBodies(){
+            for (long i = 0; i < BodyCount; i++){
+                if (MyBodies[i] != NULL){
+                    printf("Body %li Pointer %p\n",MyBodies[i]->getID(),MyBodies[i]);
+                }
+            }
+        }
+
         void tick(double TimeFrame){
+            //ListBodies();
+            
             double xforce, yforce;
             double dx, dy;
             double scalex, scaley;
@@ -159,23 +186,33 @@ class Engine {
                     for (long PeerSelector = 0; PeerSelector < BodyCount; PeerSelector++){
                         //Ensure we are not looking at the same body as both a target and a peer
                         if (MyBodies[PeerSelector] != NULL){
-                            printf("A\n");
+                            
                             if (MyBodies[BodySelector]->getID() != MyBodies[PeerSelector]->getID()){
-                                printf("B\n");
-                                distance = pow(MyBodies[BodySelector]->distanceFrom(MyBodies[PeerSelector]),2);
-                                printf("distance %lf\n",distance);
+                                
+                                distance = MyBodies[BodySelector]->distanceFrom(MyBodies[PeerSelector]);
+                                //printf("distance %li -> %li is %lf\n",MyBodies[BodySelector]->getID(),MyBodies[PeerSelector]->getID(),distance);
                                 if (distance < CollisionDistance){
+                                    printf("Collision!\n");
                                     //Body 1
+                                    printf("Collision Inputs: A: %li XV %lf YV %lf M %lf B: %li XV %lf YV %lf M %lf\n",
+                                    MyBodies[BodySelector]->getID(),MyBodies[BodySelector]->getXV(),MyBodies[BodySelector]->getYV(),MyBodies[BodySelector]->getMass(),
+                                    MyBodies[PeerSelector]->getID(),MyBodies[PeerSelector]->getXV(),MyBodies[PeerSelector]->getYV(),MyBodies[PeerSelector]->getMass()
+                                    );
                                     MyBodies[BodySelector]->setVelocity(
                                         (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
                                         (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
                                     );
 
-                                    //Body 2
-                                    MyBodies[PeerSelector]->setVelocity(
-                                        (((2 * MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((MyBodies[PeerSelector]->getMass() - MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
-                                        (((2 * MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((MyBodies[PeerSelector]->getMass() - MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
+                                    printf("Collision Velocity: %lf %lf\n",
+                                    (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
+                                        (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
                                     );
+
+                                    //Body 2 is Updated on their cycle
+                                    //MyBodies[PeerSelector]->setVelocity(
+                                    //    (((2 * MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((MyBodies[PeerSelector]->getMass() - MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
+                                    //    (((2 * MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((MyBodies[PeerSelector]->getMass() - MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
+                                    //);
 
                                     
 
@@ -183,27 +220,30 @@ class Engine {
                                 }
                                 else {
                                     // F = GMm/r^2
-                                    force = (GravityConstant * MyBodies[BodySelector]->getMass() * MyBodies[PeerSelector]->getMass()) / distance;
-                                    printf("Found force %lf\n",force);
+                                    force = (GravityConstant * MyBodies[BodySelector]->getMass() * MyBodies[PeerSelector]->getMass()) / pow(distance,2);
+                                    //printf("Found force %lf\n",force);
 
                                     //Convert to Unit Vector - Use the distance X and Y as a unit vector for the force vector
                                     dx = MyBodies[PeerSelector]->getX() - MyBodies[BodySelector]->getX();
                                     dy = MyBodies[PeerSelector]->getY() - MyBodies[BodySelector]->getY();
+                                    //printf("dx %lf dy %lf\n",dx,dy);
 
-                                    if (MyBodies[PeerSelector]->isXPlane()){
+                                    if (MyBodies[PeerSelector]->isXPlane() || MyBodies[BodySelector]->isXPlane()){
                                         scalex = 0;
                                     }
                                     else {
                                         scalex = dx / distance;
                                     }
-                                    if (MyBodies[PeerSelector]->isYPlane()){
+                                    if (MyBodies[PeerSelector]->isYPlane() || MyBodies[BodySelector]->isYPlane()){
                                         scaley = 0;
                                     }
                                     else {
-                                        scaley = dx / distance;
+                                        scaley = dy / distance;
                                     }
                                     xforce += scalex * force;
                                     yforce += scaley * force;
+                                    //printf("scalex %lf scaley %lf FX %lf FY %lf\n",scalex,scaley,scalex*force,scaley*force);
+                                    //printf("XForce: %lf YForce: %lf\n",xforce,yforce);
 
                                 }
                                 
