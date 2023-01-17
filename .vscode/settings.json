@@ -1,5 +1,12 @@
 {
     "files.associations": {
         "cmath": "cpp"
-    }
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/media/kaelan/NewDev/Dev/MicroPhysics",
+            "binaryPath": "/media/kaelan/NewDev/Dev/MicroPhysics/MicroPhysicsTest",
+            "binaryArgs": []
+        }
+    ]
 }

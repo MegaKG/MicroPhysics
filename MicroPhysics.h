@@ -10,7 +10,6 @@
 //Constants
 const double GravityConstant = 0.00001;
 const double ResistanceForce = 0.0;
-const double CollisionDistance = 0.1;
 
 class Body {
     private:
@@ -115,8 +114,55 @@ class Engine {
         long BodyCount;
         Body** MyBodies;
 
-        void relativeSpeed(double XA, double YA, double XB, double YB){
+        int sign(double Input){
+            if (Input < 0){
+                return -1;
+            }
+            return 1;
+        }
+
+        /*double relativeSpeed(Body* A, Body* B){
+            //How fast is A Going Relative to B
+            //printf("Relative Speed %li -> %li is %lf\n",A->getID(),B->getID(),-1*(pow(pow(A->getXV(),2) + pow(A->getYV(),2),0.5) - pow(pow(B->getXV(),2) + pow(B->getYV(),2),0.5)));
+            //return -1*(pow(pow(A->getXV(),2) + pow(A->getYV(),2),0.5) - pow(pow(B->getXV(),2) + pow(B->getYV(),2),0.5));
+
+            if ((A->isXPlane()) || (B->isXPlane())){
+                //Return the Absolute Distance Y
+                return pow(pow(A->getYV() - B->getYV(),2),0.5) * sign(A->getY() - B->getY());;
+            }
+            else if ((A->isYPlane()) || (B->isYPlane())){
+                //Return the Absolute Distance X
+                return pow(pow(A->getXV() - B->getXV(),2),0.5) * sign(A->getX() - B->getX());
+            }
+            else {
+                return pow(pow(A->getXV()-B->getXV(),2) + pow(A->getYV()-B->getYV(),2),0.5) * sign(A->getX() - B->getX()) * sign(A->getY() - B->getY());
+            }
+            //return 1;
+
+
+        }*/
+
+        int willCollide(Body* A, Body* B, double TimeFrame){
             
+            if ((A->isXPlane()) || (B->isXPlane())){
+                if (abs(A->getYV() - B->getYV())*TimeFrame > abs(A->getY() - B->getY()) ){
+                    return 1;
+                }
+                return 0;
+            }
+            else if ((A->isYPlane()) || (B->isYPlane())){
+                if (abs(A->getXV() - B->getXV())*TimeFrame > abs(A->getX() - B->getX()) ){
+                    return 1;
+                }
+                return 0;
+            }
+            else {
+                if ((abs(A->getYV() - B->getYV())*TimeFrame > abs(A->getY() - B->getY()) ) && (abs(A->getXV() - B->getXV())*TimeFrame > abs(A->getX() - B->getX()) )){
+                    return 1;
+                }
+                return 0;
+            }
+
         }
 
         double distanceFrom(Body* Target, Body* Peer){
@@ -197,8 +243,8 @@ class Engine {
                             if (MyBodies[BodySelector]->getID() != MyBodies[PeerSelector]->getID()){
                                 
                                 distance = distanceFrom(MyBodies[BodySelector],MyBodies[PeerSelector]);
-                                //printf("distance %li -> %li is %lf\n",MyBodies[BodySelector]->getID(),MyBodies[PeerSelector]->getID(),distance);
-                                if (distance < CollisionDistance){
+                                printf("distance %li -> %li is %lf\n",MyBodies[BodySelector]->getID(),MyBodies[PeerSelector]->getID(),distance);
+                                if (willCollide(MyBodies[BodySelector],MyBodies[PeerSelector],TimeFrame)){
                                     printf("Collision!\n");
                                     //Body 1
                                     printf("Collision Inputs: A: %li XV %lf YV %lf M %lf B: %li XV %lf YV %lf M %lf\n",
