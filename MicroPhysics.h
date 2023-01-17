@@ -51,7 +51,7 @@ class Body {
         void setVelocity(double XCH, double YCH){
             PendingXVelocity = XCH;
             PendingYVelocity = YCH;
-            printf("New Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
+            printf("Set Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
         }
 
         long getID(){
@@ -101,22 +101,7 @@ class Body {
             
         }
 
-        double distanceFrom(Body* Target){
-            printf("A: (%lf,%lf) B: (%lf,%lf)\n",this->X,this->Y,Target->X,Target->Y);
-            if ((this->WholeX) || (Target->WholeX)){
-                //Return the Absolute Distance Y
-                
-                return pow(pow(this->Y - Target->Y,2),0.5);
-            }
-            else if ((this->WholeY) || (Target->WholeY)){
-                //Return the Absolute Distance X
-                
-                return pow(pow(this->X - Target->X,2),0.5);
-            }
-            else {
-                return pow(pow(this->X - Target->X,2) + pow(this->Y - Target->Y,2),0.5);
-            }
-        }
+        
 
         void PrettyPrint(){
             printf("Object %li:\n\tPosition: (%lf,%lf)\n\tSpeed: %lf m/s\n\tMass: %lf\n",this->ID,this->X,this->Y,pow(pow(this->XVelocity,2) + pow(this->YVelocity,2),0.5),this->Mass);
@@ -129,6 +114,28 @@ class Engine {
     private:
         long BodyCount;
         Body** MyBodies;
+
+        void relativeSpeed(double XA, double YA, double XB, double YB){
+            
+        }
+
+        double distanceFrom(Body* Target, Body* Peer){
+            printf("A: (%lf,%lf) B: (%lf,%lf)\n",Peer->getX(),Peer->getY(),Target->getX(),Target->getY());
+            if ((Peer->isXPlane()) || (Peer->isXPlane())){
+                //Return the Absolute Distance Y
+                
+                return pow(pow(Peer->getY() - Target->getY(),2),0.5);
+            }
+            else if ((Peer->isYPlane()) || (Target->isYPlane())){
+                //Return the Absolute Distance X
+                
+                return pow(pow(Peer->getX() - Target->getX(),2),0.5);
+            }
+            else {
+                return pow(pow(Peer->getX() - Target->getX(),2) + pow(Peer->getY() - Target->getY(),2),0.5);
+            }
+        }
+
     public:
         Engine(long BodyCount){
             this->BodyCount = BodyCount;
@@ -189,7 +196,7 @@ class Engine {
                             
                             if (MyBodies[BodySelector]->getID() != MyBodies[PeerSelector]->getID()){
                                 
-                                distance = MyBodies[BodySelector]->distanceFrom(MyBodies[PeerSelector]);
+                                distance = distanceFrom(MyBodies[BodySelector],MyBodies[PeerSelector]);
                                 //printf("distance %li -> %li is %lf\n",MyBodies[BodySelector]->getID(),MyBodies[PeerSelector]->getID(),distance);
                                 if (distance < CollisionDistance){
                                     printf("Collision!\n");
@@ -256,17 +263,22 @@ class Engine {
                     //Convert to Unit Vector - Use the forces X and Y as a unit vector for the drag vector
                     dx = xforce;
                     dy = yforce;
+                    
+                    if ((dx != 0) || (dy != 0)){
+                        scalex = dx / pow(pow(dx,2) + pow(dy,2),0.5);
+                        scaley = dy / pow(pow(dx,2) + pow(dy,2),0.5);
+                        
 
-                    scalex = dx / pow(pow(dx,2) + pow(dy,2),0.5);
-                    scaley = dy / pow(pow(dx,2) + pow(dy,2),0.5);
+                        xforce -= scalex * ResistanceForce;
+                        yforce -= scaley * ResistanceForce;
 
-                    xforce -= scalex * ResistanceForce;
-                    yforce -= scaley * ResistanceForce;
+                        
+                    }
 
                     //Apply Accelerations to Velocity F=MA
                     MyBodies[BodySelector]->updateVelocity(
-                        (xforce/MyBodies[BodySelector]->getMass())/TimeFrame,
-                        (yforce/MyBodies[BodySelector]->getMass())/TimeFrame
+                            (xforce/MyBodies[BodySelector]->getMass())/TimeFrame,
+                            (yforce/MyBodies[BodySelector]->getMass())/TimeFrame
                     );
 
                 
