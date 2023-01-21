@@ -9,7 +9,7 @@
 
 //Constants
 const double GravityConstant = 0.00001;
-const double ResistanceForce = 0.0;
+const double ResistanceForce = -0.001;
 
 class Body {
     private:
@@ -37,23 +37,26 @@ class Body {
             this->Y = Y;
             this->XVelocity = XVelocity;
             this->YVelocity = YVelocity;
+            this->PendingXVelocity = XVelocity;
+            this->PendingYVelocity = YVelocity;
             this->WholeX = WholeX;
             this->WholeY = WholeY;
             this->Mass = Mass;
             this->ID = ID;
             this->Radius = Radius;
+            //printf("Init Body ID: %li Pos: %lf, %lf Mass: %lf Radius: %lf Velocity: %lf, %lf, Planes: %i %i\n",ID,X,Y,Mass,Radius,XVelocity,YVelocity,WholeX,WholeY);
         }
 
         void updateVelocity(double XCH, double YCH){
             PendingXVelocity += XCH;
             PendingYVelocity += YCH;
-            printf("New Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
+            //printf("New Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
         }
 
         void setVelocity(double XCH, double YCH){
             PendingXVelocity = XCH;
             PendingYVelocity = YCH;
-            printf("Set Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
+            //printf("Set Velocity %lf %lf\n",PendingXVelocity,PendingYVelocity);
         }
 
         long getID(){
@@ -113,6 +116,11 @@ class Body {
             printf("Object %li:\n\tPosition: (%lf,%lf)\n\tSpeed: %lf m/s\n\tMass: %lf\n",this->ID,this->X,this->Y,pow(pow(this->XVelocity,2) + pow(this->YVelocity,2),0.5),this->Mass);
         }
 
+        void jsonPrint(){
+            printf("{\"ID\": %li, \"Position\": [%lf, %lf], \"Mass\": %lf, \"Radius\": %lf}\n",this->ID,this->X,this->Y,this->Mass,this->Radius);
+
+        }
+
         
 };
 
@@ -130,7 +138,7 @@ class Engine {
 
         
         double distanceFrom(Body* Target, Body* Peer){
-            printf("A: (%lf,%lf) B: (%lf,%lf)\n",Peer->getX(),Peer->getY(),Target->getX(),Target->getY());
+            //printf("A: (%lf,%lf) B: (%lf,%lf)\n",Peer->getX(),Peer->getY(),Target->getX(),Target->getY());
             if ((Peer->isXPlane()) || (Peer->isXPlane())){
                 //Return the Absolute Distance Y
                 
@@ -214,23 +222,23 @@ class Engine {
                             if (MyBodies[BodySelector]->getID() != MyBodies[PeerSelector]->getID()){
                                 
                                 distance = distanceFrom(MyBodies[BodySelector],MyBodies[PeerSelector]);
-                                printf("distance %li -> %li is %lf\n",MyBodies[BodySelector]->getID(),MyBodies[PeerSelector]->getID(),distance);
+                                //printf("distance %li -> %li is %lf\n",MyBodies[BodySelector]->getID(),MyBodies[PeerSelector]->getID(),distance);
                                 if (willCollide(MyBodies[BodySelector],MyBodies[PeerSelector],TimeFrame)){
-                                    printf("Collision!\n");
+                                    //printf("Collision!\n");
                                     //Body 1
-                                    printf("Collision Inputs: A: %li XV %lf YV %lf M %lf B: %li XV %lf YV %lf M %lf\n",
-                                    MyBodies[BodySelector]->getID(),MyBodies[BodySelector]->getXV(),MyBodies[BodySelector]->getYV(),MyBodies[BodySelector]->getMass(),
-                                    MyBodies[PeerSelector]->getID(),MyBodies[PeerSelector]->getXV(),MyBodies[PeerSelector]->getYV(),MyBodies[PeerSelector]->getMass()
-                                    );
+                                    //printf("Collision Inputs: A: %li XV %lf YV %lf M %lf B: %li XV %lf YV %lf M %lf\n",
+                                    //MyBodies[BodySelector]->getID(),MyBodies[BodySelector]->getXV(),MyBodies[BodySelector]->getYV(),MyBodies[BodySelector]->getMass(),
+                                    //MyBodies[PeerSelector]->getID(),MyBodies[PeerSelector]->getXV(),MyBodies[PeerSelector]->getYV(),MyBodies[PeerSelector]->getMass()
+                                    //);
                                     MyBodies[BodySelector]->setVelocity(
                                         (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
                                         (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
                                     );
 
-                                    printf("Collision Velocity: %lf %lf\n",
-                                    (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
-                                        (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
-                                    );
+                                    //printf("Collision Velocity: %lf %lf\n",
+                                    //(((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
+                                    //    (((MyBodies[BodySelector]->getMass() - MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((2 * MyBodies[PeerSelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
+                                    //);
 
                                     //Body 2 is Updated on their cycle
                                     
