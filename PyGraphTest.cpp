@@ -11,7 +11,7 @@ int main(){
     
 
 
-    Engine* MyEngine = new Engine(2);
+    Engine* MyEngine = new Engine(3);
     
     MyEngine->insertBody(Platform);
     MyEngine->insertBody(Person);

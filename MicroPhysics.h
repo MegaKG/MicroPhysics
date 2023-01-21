@@ -9,7 +9,7 @@
 
 //Constants
 const double GravityConstant = 0.00001;
-const double ResistanceForce = -0.001;
+const double ResistanceForce = 0;
 
 class Body {
     private:
@@ -113,7 +113,8 @@ class Body {
         
 
         void PrettyPrint(){
-            printf("Object %li:\n\tPosition: (%lf,%lf)\n\tSpeed: %lf m/s\n\tMass: %lf\n",this->ID,this->X,this->Y,pow(pow(this->XVelocity,2) + pow(this->YVelocity,2),0.5),this->Mass);
+            double Energy = ((0.5 * this->Mass) * pow(XVelocity,2)) + ((0.5 * this->Mass) * pow(YVelocity,2));
+            printf("Object %li:\n\tPosition: (%lf,%lf)\n\tSpeed: %lf m/s\n\tMass: %lf\nKinetic Energy: %lf",this->ID,this->X,this->Y,pow(pow(this->XVelocity,2) + pow(this->YVelocity,2),0.5),this->Mass,Energy);
         }
 
         void jsonPrint(){
