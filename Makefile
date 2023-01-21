@@ -7,4 +7,5 @@ graph:
 pygraph:
 	g++ PyGraphTest.cpp -lm -g -o PyGraph -O3 
 
-
+gas:
+	g++ GasTest.cpp -lm -g -o GasGraph -O3 
