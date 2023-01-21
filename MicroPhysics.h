@@ -28,9 +28,11 @@ class Body {
 
         char WholeX; //Is an X Plane, locks the body in place
         char WholeY; //Is a Y Plane, locks the body in place
+
+        double Radius;
     
     public:
-        Body(long ID, double X, double Y, double Mass, double XVelocity, double YVelocity, char WholeX, char WholeY){
+        Body(long ID, double X, double Y, double Mass, double Radius, double XVelocity, double YVelocity, char WholeX, char WholeY){
             this->X = X;
             this->Y = Y;
             this->XVelocity = XVelocity;
@@ -39,6 +41,7 @@ class Body {
             this->WholeY = WholeY;
             this->Mass = Mass;
             this->ID = ID;
+            this->Radius = Radius;
         }
 
         void updateVelocity(double XCH, double YCH){
@@ -55,6 +58,10 @@ class Body {
 
         long getID(){
             return this->ID;
+        }
+
+        double getRadius(){
+            return this->Radius;
         }
 
         double getX(){
@@ -121,50 +128,7 @@ class Engine {
             return 1;
         }
 
-        /*double relativeSpeed(Body* A, Body* B){
-            //How fast is A Going Relative to B
-            //printf("Relative Speed %li -> %li is %lf\n",A->getID(),B->getID(),-1*(pow(pow(A->getXV(),2) + pow(A->getYV(),2),0.5) - pow(pow(B->getXV(),2) + pow(B->getYV(),2),0.5)));
-            //return -1*(pow(pow(A->getXV(),2) + pow(A->getYV(),2),0.5) - pow(pow(B->getXV(),2) + pow(B->getYV(),2),0.5));
-
-            if ((A->isXPlane()) || (B->isXPlane())){
-                //Return the Absolute Distance Y
-                return pow(pow(A->getYV() - B->getYV(),2),0.5) * sign(A->getY() - B->getY());;
-            }
-            else if ((A->isYPlane()) || (B->isYPlane())){
-                //Return the Absolute Distance X
-                return pow(pow(A->getXV() - B->getXV(),2),0.5) * sign(A->getX() - B->getX());
-            }
-            else {
-                return pow(pow(A->getXV()-B->getXV(),2) + pow(A->getYV()-B->getYV(),2),0.5) * sign(A->getX() - B->getX()) * sign(A->getY() - B->getY());
-            }
-            //return 1;
-
-
-        }*/
-
-        int willCollide(Body* A, Body* B, double TimeFrame){
-            
-            if ((A->isXPlane()) || (B->isXPlane())){
-                if (abs(A->getYV() - B->getYV())*TimeFrame > abs(A->getY() - B->getY()) ){
-                    return 1;
-                }
-                return 0;
-            }
-            else if ((A->isYPlane()) || (B->isYPlane())){
-                if (abs(A->getXV() - B->getXV())*TimeFrame > abs(A->getX() - B->getX()) ){
-                    return 1;
-                }
-                return 0;
-            }
-            else {
-                if ((abs(A->getYV() - B->getYV())*TimeFrame > abs(A->getY() - B->getY()) ) && (abs(A->getXV() - B->getXV())*TimeFrame > abs(A->getX() - B->getX()) )){
-                    return 1;
-                }
-                return 0;
-            }
-
-        }
-
+        
         double distanceFrom(Body* Target, Body* Peer){
             printf("A: (%lf,%lf) B: (%lf,%lf)\n",Peer->getX(),Peer->getY(),Target->getX(),Target->getY());
             if ((Peer->isXPlane()) || (Peer->isXPlane())){
@@ -180,6 +144,13 @@ class Engine {
             else {
                 return pow(pow(Peer->getX() - Target->getX(),2) + pow(Peer->getY() - Target->getY(),2),0.5);
             }
+        }
+
+        int willCollide(Body* A, Body* B, double TimeFrame){
+            double distance = distanceFrom(A,B);
+            double totalRadius = A->getRadius() + B->getRadius();
+
+            return (distance < totalRadius);
         }
 
     public:
@@ -262,10 +233,8 @@ class Engine {
                                     );
 
                                     //Body 2 is Updated on their cycle
-                                    //MyBodies[PeerSelector]->setVelocity(
-                                    //    (((2 * MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getXV()) + (((MyBodies[PeerSelector]->getMass() - MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getXV()),
-                                    //    (((2 * MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[BodySelector]->getYV()) + (((MyBodies[PeerSelector]->getMass() - MyBodies[BodySelector]->getMass())/(MyBodies[BodySelector]->getMass() + MyBodies[PeerSelector]->getMass())) * MyBodies[PeerSelector]->getYV())
-                                    //);
+                                    
+                                    //Exit the Area
 
                                     
 
