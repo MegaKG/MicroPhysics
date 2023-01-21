@@ -9,7 +9,7 @@
 
 //Constants
 const double GravityConstant = 0.00001;
-const double ResistanceForce = 0;
+const double ResistanceForce = -0.00001;
 
 class Body {
     private:
@@ -292,10 +292,19 @@ class Engine {
                         scalex = dx / pow(pow(dx,2) + pow(dy,2),0.5);
                         scaley = dy / pow(pow(dx,2) + pow(dy,2),0.5);
                         
+                        if (abs(scalex* ResistanceForce) <= abs(xforce)){
+                            xforce -= scalex * ResistanceForce;
+                        }
+                        else {
+                            xforce = 0;
+                        }
 
-                        xforce -= scalex * ResistanceForce;
-                        yforce -= scaley * ResistanceForce;
-
+                        if (abs(scaley* ResistanceForce) <= abs(yforce)){
+                            yforce -= scaley * ResistanceForce;
+                        }
+                        else {
+                            yforce = 0;
+                        }
                         
                     }
 
