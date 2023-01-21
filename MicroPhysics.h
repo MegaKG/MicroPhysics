@@ -117,7 +117,7 @@ class Body {
         }
 
         void jsonPrint(){
-            printf("{\"ID\": %li, \"Position\": [%lf, %lf], \"Mass\": %lf, \"Radius\": %lf}\n",this->ID,this->X,this->Y,this->Mass,this->Radius);
+            printf("{\"ID\": %li, \"Position\": [%lf, %lf], \"Mass\": %lf, \"Radius\": %lf, \"Velocity\": [%lf, %lf]}\n",this->ID,this->X,this->Y,this->Mass,this->Radius,this->XVelocity,this->YVelocity);
 
         }
 
