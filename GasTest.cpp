@@ -8,14 +8,14 @@ double randomDouble(double Min, double Max){
 
 int main(){
     //Surface of the Moon
-    Body* Platform = new Body(0,0,0,1000,1,0,0,1,0);
+    Body* Platform = new Body(0,0,-32,1000,1,0,0,1,0);
     
     Engine* MyEngine = new Engine(GasNum+1);
     
     MyEngine->insertBody(Platform);
 
     for (int i = 0; i < GasNum; i++){
-        MyEngine->insertBody(new Body(i+1,randomDouble(-30,30),randomDouble(1,30),randomDouble(1,10),1,0,0,0,0));
+        MyEngine->insertBody(new Body(i+1,randomDouble(-30,30),randomDouble(-30,30),randomDouble(1,10),1,randomDouble(-0.1,0.1),randomDouble(-0.1,0.1),0,0));
     }
 
 
