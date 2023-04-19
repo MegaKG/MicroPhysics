@@ -1,15 +1,15 @@
 #include <graphics.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "MicroPhysics.h"
+#include "MicroPhysics_OpenCL.h"
 #include <iostream>
 
 #undef printf
 int main(){
     //Surface of the Moon
-    Body* Platform = new Body(0,0,0,1000,1,0,0,1,0);
+    Body* Platform = NewBody(0,0,0,1000,1,0,0,1,0);
     printf("Init Platform %p Size of %li\n",Platform,sizeof(*Platform));
-    Body* Person = new Body(1,50,30,6,3,0,0,0,0);
+    Body* Person = NewBody(1,50,30,6,3,0,0,0,0);
     printf("Init Person %p Size of %li\n",Person,sizeof(*Person));
 
 
@@ -36,10 +36,12 @@ int main(){
         cleardevice();
         
         //Render Platform
-        line(0,Platform->getY(),getmaxx(),Platform->getY());
+        Platform = MyEngine->getBody(0);
+        line(0,Platform->Y,getmaxx(),Platform->Y);
 
         //Render Person
-        circle(Person->getX(),Person->getY(),Person->getRadius());
+        Person = MyEngine->getBody(1);
+        circle(Person->X,Person->Y,Person->Radius);
 
         //if (grgetch() == 'q'){
         //    break;
