@@ -65,7 +65,7 @@ Body* NewBody(long ID, double X, double Y, double Mass, double Radius, double XV
 
 class Engine {
     private:
-        cl_int BodyCount;
+        cl_long BodyCount;
         Body* MyBodies;
 
         cl_int ret;
@@ -144,8 +144,8 @@ class Engine {
 
             //Create Arrays in GPU Memory
             gpuBodies = clCreateBuffer(context, CL_MEM_READ_WRITE, BodyCount * sizeof(Body), NULL, &ret);
-            gpuTimeFrame = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(cl_int), NULL, &ret);
-            gpuBodiesLen = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(cl_int), NULL, &ret);
+            gpuTimeFrame = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(cl_double), NULL, &ret);
+            gpuBodiesLen = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(cl_long), NULL, &ret);
             //printf("Allocate GPU Memory\n");
 
             //Set the Arguments
@@ -158,7 +158,7 @@ class Engine {
             ret = clSetKernelArg(tickkernel, 2, sizeof(cl_mem), (void*)&gpuBodiesLen);
             //printf("Set Arguments for Kernels\n");
 
-            ret = clEnqueueWriteBuffer(command_queue, gpuBodiesLen, CL_TRUE, 0, 1 * sizeof(cl_int), &BodyCount, 0, NULL, NULL);
+            ret = clEnqueueWriteBuffer(command_queue, gpuBodiesLen, CL_TRUE, 0, 1 * sizeof(cl_long), &BodyCount, 0, NULL, NULL);
             //printf("Wrote Array Length\n");
             
         }
@@ -214,7 +214,7 @@ class Engine {
         }
 
         void tick(cl_double TimeFrame){
-            ret = clEnqueueWriteBuffer(command_queue, gpuTimeFrame, CL_TRUE, 0, 3 * sizeof(cl_double), &TimeFrame, 0, NULL, NULL);
+            ret = clEnqueueWriteBuffer(command_queue, gpuTimeFrame, CL_TRUE, 0, 1 * sizeof(cl_double), &TimeFrame, 0, NULL, NULL);
             //printf("Update Timeframe\n");
             //printf("TimeFrame %f\n",TimeFrame);
 

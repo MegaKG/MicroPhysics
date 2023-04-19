@@ -59,10 +59,10 @@ int willCollide(CLBody A, CLBody B, double TimeFrame){
     return (distance < totalRadius);
 }
 
-__kernel void doMaths(__global CLBody* MyBodies, __global double* TimeFrameIn, __global double* ListLengthIn){
+__kernel void doMaths(__global CLBody* MyBodies, __global double* TimeFrameIn, __global int* ListLengthIn){
     double TimeFrame = TimeFrameIn[0];
-    double ListLength = ListLengthIn[0];
-    //printf("ATimeFrame %f ListLength %f\n",TimeFrame,ListLength);
+    int ListLength = (long)ListLengthIn[0];
+    //printf("ATimeFrame %f ListLength %i\n",TimeFrame,ListLength);
     //printf("Start Obj\n");
 
     int BodySelector = get_global_id(0);
@@ -78,7 +78,7 @@ __kernel void doMaths(__global CLBody* MyBodies, __global double* TimeFrameIn, _
     yforce = 0;
 
     for (long PeerSelector = 0; PeerSelector < ListLength; PeerSelector++){
-        printf("peer %i\n",PeerSelector);
+        //printf("peer %i\n",PeerSelector);
         if (MyBodies[BodySelector].ID != MyBodies[PeerSelector].ID){           
             distance = distanceFrom(MyBodies[BodySelector],MyBodies[PeerSelector]);
             //printf("Dist From %i to %i is %f\n",MyBodies[BodySelector].ID,MyBodies[PeerSelector].ID,distance);
